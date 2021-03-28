@@ -10,14 +10,21 @@
  * cara menggunakan lihat pada fungsi main()
  */
 
+/*
+ * Diupdate oleh Frans Wijaya
+ * -- tanggal 28 Maret 2021
+ * Modifikasi data yang disimpan menjadi string untuk keperluan latihan modul-0
+ * Struktur Data 2021
+*/
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 
 /* Struktur Node */
 
 typedef struct snode_t {
-    int data;
+    char data[100];
     struct snode_t *next;
 } SListNode;
 
@@ -32,16 +39,18 @@ typedef struct slist_t {
 
 void slist_init(SinglyList *list);
 bool slist_isEmpty(SinglyList *list);
-void slist_pushFront(SinglyList *list, int value);
+void slist_pushFront(SinglyList *list, char* value);
 void slist_popFront(SinglyList *list);
-void slist_pushBack(SinglyList *list, int value);
+void slist_pushBack(SinglyList *list, char* value);
 void slist_popBack(SinglyList *list);
-void slist_insertAt(SinglyList *list, int index, int value);
+void slist_insertAt(SinglyList *list, int index, char* value);
 void slist_removeAt(SinglyList *list, int index);
-void slist_remove(SinglyList *list, int value);
-int  slist_front(SinglyList *list);
-int  slist_back(SinglyList *list);
-int  slist_getAt(SinglyList *list, int index);
+void slist_remove(SinglyList *list, char* value);
+void forEachElement(SinglyList *list, void (*f)(SListNode*) );
+void print (SListNode*);
+char*  slist_front(SinglyList *list);
+char* slist_back(SinglyList *list);
+char*  slist_getAt(SinglyList *list, int index);
 
 /* Function definition below */
 
@@ -55,12 +64,12 @@ bool slist_isEmpty(SinglyList *list) {
     return (list->_head == NULL);
 }
 
-void slist_pushFront(SinglyList *list, int value) 
+void slist_pushFront(SinglyList *list, char* value) 
 {
     SListNode *newNode = (SListNode*) malloc(sizeof(SListNode));
     if (newNode) {
         list->_size++;
-        newNode->data = value;
+        strcpy(newNode->data, value);
 
         if (slist_isEmpty(list)) newNode->next = NULL;
         else newNode->next = list->_head;
@@ -78,12 +87,12 @@ void slist_popFront(SinglyList *list)
     }
 }
 
-void slist_pushBack(SinglyList *list, int value)
+void slist_pushBack(SinglyList *list, char* value)
 {
     SListNode *newNode = (SListNode*) malloc(sizeof(SListNode));
     if (newNode) {
         list->_size++;
-        newNode->data = value;
+        strcpy(newNode->data, value);
         newNode->next = NULL;
         
         if (slist_isEmpty(list)) 
@@ -119,7 +128,7 @@ void slist_popBack(SinglyList *list)
     }
 }
 
-void slist_insertAt(SinglyList *list, int index, int value)
+void slist_insertAt(SinglyList *list, int index, char* value)
 {
     /* Kasus apabila posisinya melebihi batas */
     if (slist_isEmpty(list) || index >= list->_size) {
@@ -139,7 +148,7 @@ void slist_insertAt(SinglyList *list, int index, int value)
             temp = temp->next;
             _i++;
         }
-        newNode->data = value;
+        strcpy(newNode->data, value);
         newNode->next = temp->next;
         temp->next = newNode;
         list->_size++;
@@ -173,17 +182,17 @@ void slist_removeAt(SinglyList *list, int index)
     }
 }
 
-void slist_remove(SinglyList *list, int value)
+void slist_remove(SinglyList *list, char* value)
 {
     if (!slist_isEmpty(list)) {
         SListNode *temp, *prev;
         temp = list->_head;
 
-        if (temp->data == value) {
+        if (strcmp(temp->data, value) == 0) {
             slist_popFront(list);
             return;
         }
-        while (temp != NULL && temp->data != value) {
+        while (temp != NULL && strcmp(temp->data, value) != 0) {
             prev = temp;
             temp = temp->next;
         }
@@ -195,15 +204,15 @@ void slist_remove(SinglyList *list, int value)
     }
 }
 
-int slist_front(SinglyList *list)
+char* slist_front(SinglyList *list)
 {
     if (!slist_isEmpty(list)) {
         return list->_head->data;
     }
-    return 0;
+    return NULL;
 }
 
-int slist_back(SinglyList *list)
+char* slist_back(SinglyList *list)
 {
     if (!slist_isEmpty(list)) {
         SListNode *temp = list->_head;
@@ -211,10 +220,10 @@ int slist_back(SinglyList *list)
             temp = temp->next;
         return temp->data;
     }
-    return 0;
+    return NULL;
 }
 
-int slist_getAt(SinglyList *list, int index)
+char* slist_getAt(SinglyList *list, int index)
 {
     if (!slist_isEmpty(list)) {
         SListNode *temp = list->_head;
@@ -225,7 +234,29 @@ int slist_getAt(SinglyList *list, int index)
         }
         return temp->data;
     }
-    return 0;
+    return NULL;
+}
+
+//Fungsi untuk mencetak elemen sebuah node
+void print (SListNode *node) {
+	printf("%s ", node->data);
+	return;
+}
+
+//Fungsi untuk menunjuk setiap elemen link list kemudian mengoperasikannya dengan funsi tertentu
+void forEachElement (SinglyList *list, void(*f)(SListNode*)) {
+	if (slist_isEmpty(list)) {
+		printf ("List kosong\n");
+	}
+	else {
+		SListNode *temp = list->_head;
+		while (temp->next != NULL) {
+			(*f)(temp);
+			temp = temp->next;
+		}
+		(*f)(temp);
+	}
+	return ;
 }
 
 int main(int argc, char const *argv[])
@@ -237,33 +268,45 @@ int main(int argc, char const *argv[])
     slist_init(&myList);
 
     // Gunakan operasi linked list
-    slist_pushBack(&myList, 1);
-    slist_pushBack(&myList, 2);
-    slist_pushBack(&myList, 3);
-    slist_pushBack(&myList, 4);
+    slist_pushBack(&myList, "aku");
+    slist_pushBack(&myList, "dia");
+    slist_pushBack(&myList, "frans");
+    slist_pushBack(&myList, "nata");
 
-    slist_pushFront(&myList, 10);
-    slist_pushFront(&myList, 9);
-    slist_pushFront(&myList, 8);
-    slist_pushFront(&myList, 7);
+    slist_pushFront(&myList, "tiki");
+    slist_pushFront(&myList, "lisa");
+    slist_pushFront(&myList, "pikachu");
+    slist_pushFront(&myList, "bdikz");
 
+	forEachElement(&myList, print);
+	printf("\n");
+	
     slist_popBack(&myList);
     slist_popFront(&myList);
-
-    // Isi List => [8, 9, 10, 1, 2, 3]
-
+	
+	forEachElement(&myList, print);
+	printf("\n");
+	
     slist_removeAt(&myList, 3);
-
-    slist_insertAt(&myList, 1, 13);
-    slist_pushBack(&myList, 1);
-    slist_remove(&myList, 1);
+	
+	forEachElement(&myList, print);
+    printf("\n");
+	
+    slist_insertAt(&myList, 1, "testing");
+    slist_pushBack(&myList, "jason");
     
-    // Isi List => [8, 13, 9, 10, 2, 3]
-    // printlist reversed
-    while (myList._head != NULL) {
-        printf("%d ", slist_back(&myList));
-        slist_popBack(&myList);
-    }
+    forEachElement(&myList, print);
+    printf("\n");
+    
+    slist_remove(&myList, "jason");
+    
+    forEachElement(&myList, print);
+    printf("\n");
+    
+    printf("%s\n", slist_front(&myList));
+    printf("%s\n", slist_back(&myList));
+    printf("%s\n", slist_getAt(&myList, 3));
+    
     puts("");
     return 0;
 }
