@@ -37,6 +37,7 @@ int  dArray_front(DynamicArray *darray);
 void dArray_setAt(DynamicArray *darray, unsigned index, int value);
 int  dArray_getAt(DynamicArray *darray, unsigned index);
 void dArray_insertAt(DynamicArray *darray, unsigned index, int value);
+void dArray_removeAt (DynamicArray *darray, unsigned index);
 
 // Definisi fungsi
 
@@ -142,7 +143,7 @@ void dArray_removeAt (DynamicArray *darray, unsigned index) {
 	else if (index >= darray->_size) dArray_popBack(darray);
 	else {
 		int *tempArr = (int*) malloc(sizeof(int) * (darray->_size - index + 1));
-	    unsigned i, it=0;
+		unsigned i, it=0;
 		for (i=index+1;i<darray->_size;i++){
 			tempArr[it] = darray->_arr[i];
 			it++;
